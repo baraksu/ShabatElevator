@@ -10,17 +10,19 @@
  msg1 db 13,10,,'  Enter numbers of floors' ,13,10,'$'
  msg2 db 13,10,' Enter size of floor' ,13,10,'$'
  floor_num db ?
- floor_size db ?
-x dw 1h
-y dw 1h
-column dw 50
-row dw 100 
-w equ 16
-h equ 4
+ floor_size dw ?
+x_coordinate dw 199
+y dw 179
+color dw 15 
+len dw 10
+x_temp dw 10 
+x_2 dw 100
+y_2 dw 0
+
  
  
 
-.CODE  
+.CODE
 
 start: 
     mov ax, @data
@@ -30,7 +32,7 @@ start:
    mov ah,09h
    int 21h 
    
-   read_floor:
+   read_floor:                                                                                                                                                                                                                                               
    lea dx, msg1
    mov ah,09h
    int 21h       
@@ -65,10 +67,79 @@ mov al, 10 ; multiply first digit by 10
 mul bl
 
 add al, bh ; add second digit
-mov floor_size, al
+mov floor_size, ax
  
  mov ax,13h
- int 10h  
+ int 10h 
+ 
+ loop:
+ 
+	 proc draw_pixe
+	pusha
+	xor bh, bh  ; bh = 0
+	mov cx, [x_2]
+	mov dx, [y_2]
+	mov ax, [color] 
+	mov ah, 0ch
+	int 10h
+	inc y_2
+	cmp y_2,180
+	jb draw_pixe  
+	
+
+     proc draw_pixel
+	pusha
+	xor bh, bh  ; bh = 0
+	mov cx, [x_2]
+	mov dx, [y_2]
+	mov ax, [color] 
+	mov ah, 0ch
+	int 10h  
+	inc x_2
+	cmp x_2, 200
+	jb draw_pixel
+	
+	 proc draw_pixels
+	pusha
+	xor bh, bh  ; bh = 0
+	mov cx, [x_coordinate]
+	mov dx, [y]
+	mov ax, [color] 
+	mov ah, 0ch
+	int 10h
+	dec y
+	cmp y,20
+	jg draw_pixels  
+	
+
+     proc draw_pixelss
+	pusha
+	xor bh, bh  ; bh = 0
+	mov cx, [x_coordinate]
+	mov dx, [y]
+	mov ax, [color] 
+	mov ah, 0ch
+	int 10h  
+	dec x_coordinate
+	cmp x_coordinate, 100
+	jg draw_pixelss  
+	  
+	 
+	
+	    
+	
+	
+	
+	
+	
+  
+ 
+
+    
+
+  
+     
+
   
   
  
