@@ -12,8 +12,9 @@
  max dw 200
  floor_num db ?
  floor_size dw ?
+ remember dw ?
 x_coordinate dw 199
-y dw 179
+y dw 199
 color dw 15 
 len dw 10
 x_temp dw 10 
@@ -23,7 +24,7 @@ first_floor dw 100
 next_floor dw ? 
                 
                 
-x_center dw 20
+x_center dw 30
 y_center dw 130
 y_value dw 0
 x_value dw 10 
@@ -258,41 +259,141 @@ dec cx ; increase x values
   
 
 ret
-endp circle+
+endp circle+  
+
+ proc draw_LeftLine
+	pusha
+	xor bh, bh  ; bh = 0
+	mov cx, [x_2]
+	mov dx, [y_2]
+	mov ax, [color] 
+	mov ah, 0ch
+	int 10h
+	inc y_2
+	cmp y_2,199
+	jb draw_LeftLine 
+	popa
+	
+	endp draw_LeftLine 
+	
+
+     proc draw_GroundFloor
+	pusha
+	xor bh, bh  ; bh = 0
+	mov cx, [x_2]
+	mov dx, [y_2]
+	mov ax, [color] 
+	mov ah, 0ch
+	int 10h  
+	inc x_2
+	cmp x_2, 200
+	jb draw_GroundFloor  
+	popa
+	
+	endp  draw_GroundFloor
+	
+	
+	 proc draw_RightLine
+	pusha
+	xor bh, bh  ; bh = 0
+	mov cx, [x_coordinate]
+	mov dx, [y]
+	mov ax, [color] 
+	mov ah, 0ch
+	int 10h
+	dec y
+	cmp y,20
+	jg draw_RightLine  
+	popa
+	
+	endp draw_RightLine
+	
+
+     proc draw_Roof
+	pusha
+	xor bh, bh  ; bh = 0
+	mov cx, [x_coordinate]
+	mov dx, [y]
+	mov ax, [color] 
+	mov ah, 0ch
+	int 10h  
+	dec x_coordinate
+	cmp x_coordinate, 100
+	jg draw_Roof  
+	popa
+	
+	endp draw_Roof
+	  
+	 
+	  proc draw_Floor
+	pusha            
+	xor bh, bh  ; bh = 0
+	mov cx, [first_floor]
+	mov dx, [floor_size]
+	mov ax, [color] 
+	mov ah, 0ch
+	int 10h  
+	inc first_floor
+	cmp first_floor, 200
+	jb draw_Floor
+	je math  
+	popa
+	ret
+	  endp draw_Floor
+	    
+	 
+	
+	
+	  proc new_floor
+	pusha            
+	xor bh, bh  ; bh = 0
+	mov cx, [first_floor]
+	mov dx, floor_size
+	
+	mov ax, [color] 
+	mov ah, 0ch
+	int 10h  
+	dec first_floor
+	cmp first_floor, 100
+	ja new_Floor
+	popa
+	 ret
+	  endp new_Floor
+	 
+	  
+	  
 
 
 
 start: 
     mov ax, @data
-    mov ds, ax
-    xor ax,ax  
-     lea dx,logo
-   mov ah,09h
-   int 21h 
-   
-   read_floor:                                                                                                                                                                                                                                               
+    mov ds, ax  
+ 
+    lea dx,logo
+    mov ah,09h
+    int 21h 
+    
+  read_floor:                                                                                                                                                                                                                                               
    lea dx, msg1
    mov ah,09h
    int 21h       
-        mov ah, 1 ; read character function
-int 21h   ; read first digit
-sub al, '0' ; convert ASCII to integer 
-cmp al, 9
-ja read_floor
-
-mov floor_num, al
+   mov ah, 1 ; read character function
+   int 21h   ; read first digit
+   sub al, '0' ; convert ASCII to integer 
+   cmp al, 9
+  ja read_floor
+   mov floor_num, al
    
-   read_size:
+  read_size:
    lea dx, msg2
    mov ah,09h
    int 21h
-  mov ah, 1 ; read character function
-int 21h   ; read first digit
-sub al, '0' ; convert ASCII to integer 
-cmp bl, 9
-ja read_size
-
-mov bl, al ; save first digit in BL 
+   mov ah, 1 ; read character function
+   int 21h   ; read first digit
+   sub al, '0' ; convert ASCII to integer 
+   cmp bl, 9
+  ja read_size
+   mov bl, al ; save first digit in BL 
 
 
 mov ah, 1 ; read character function
@@ -308,9 +409,10 @@ mul bl
 
 add al, bh ; add second digit
 cmp al, 20
-jbe read_size 
-sub max, ax
-mov ax, max
+jbe read_size
+mov remember, ax
+mov ax, max 
+sub ax, remember
 mov floor_size, ax 
 
 
@@ -321,99 +423,31 @@ mov floor_size, ax
  
  mov ax,13h
  int 10h 
- 
- loop:
- 
-	 proc draw_LefteLine
-	pusha
-	xor bh, bh  ; bh = 0
-	mov cx, [x_2]
-	mov dx, [y_2]
-	mov ax, [color] 
-	mov ah, 0ch
-	int 10h
-	inc y_2
-	cmp y_2,180
-	jb draw_LefteLine  
-	
 
-     proc draw_GroundFloor
-	pusha
-	xor bh, bh  ; bh = 0
-	mov cx, [x_2]
-	mov dx, [y_2]
-	mov ax, [color] 
-	mov ah, 0ch
-	int 10h  
-	inc x_2
-	cmp x_2, 200
-	jb draw_GroundFloor
-	
-	 proc draw_RightLine
-	pusha
-	xor bh, bh  ; bh = 0
-	mov cx, [x_coordinate]
-	mov dx, [y]
-	mov ax, [color] 
-	mov ah, 0ch
-	int 10h
-	dec y
-	cmp y,20
-	jg draw_RightLine  
-	
+   
+   call draw_LeftLine
+    
+    math:
+    
+   mov ax, floor_size 
+	   
+	 sub ax, remember
 
-     proc draw_Roof
-	pusha
-	xor bh, bh  ; bh = 0
-	mov cx, [x_coordinate]
-	mov dx, [y]
-	mov ax, [color] 
-	mov ah, 0ch
-	int 10h  
-	dec x_coordinate
-	cmp x_coordinate, 100
-	jg draw_Roof  
-	  
-	 
-	  proc draw_Floor
-	pusha            
-	xor bh, bh  ; bh = 0
-	mov cx, [first_floor]
-	mov dx, [floor_size]
-	mov ax, [color] 
-	mov ah, 0ch
-	int 10h  
-	inc first_floor
-	cmp first_floor, 200
-	jb draw_Floor   
-	
-	
-	  proc new_floor
-	pusha            
-	xor bh, bh  ; bh = 0
-	mov cx, [first_floor]
-	sub dx, floor_size
-	
-	mov ax, [color] 
-	mov ah, 0ch
-	int 10h  
-	dec first_floor
-	cmp first_floor, 100
-	ja new_Floor 
+mov floor_size, ax  
+ call new_floor
+  
 	
 	
 	
+	circle_proc:
 	int 10h 
 
- mov x_center,30
-
- mov y_center,140
-
+ mov x_center,10
+ mov y_center,120
  mov y_value,0
-
- mov x_value,10
-
+ mov x_value,20
  call circle
+    
 	
 	
 	
