@@ -10,7 +10,7 @@
  msg1 db 13,10,,'  Enter numbers of floors' ,13,10,'$'
  msg2 db 13,10,' Enter size of floor' ,13,10,'$'
  max dw 200
- floor_num db ?
+ floor_num dw ?
  floor_size dw ?
  remember dw ?
 x_coordinate dw 199
@@ -22,7 +22,7 @@ x_2 dw 100
 y_2 dw 20
 first_floor dw 100
 next_floor dw ? 
-                
+mone dw 0                
                 
 x_center dw 30
 y_center dw 130
@@ -259,7 +259,7 @@ dec cx ; increase x values
   
 
 ret
-endp circle+  
+endp circle  
 
  proc draw_LeftLine
 	pusha
@@ -328,38 +328,38 @@ endp circle+
 	  proc draw_Floor
 	pusha            
 	xor bh, bh  ; bh = 0
+	
+	
 	mov cx, [first_floor]
 	mov dx, [floor_size]
 	mov ax, [color] 
 	mov ah, 0ch
 	int 10h  
 	inc first_floor
-	cmp first_floor, 200
+	cmp first_floor, 199
 	jb draw_Floor
-	je math  
+	je math
 	popa
-	ret
+
 	  endp draw_Floor
 	    
 	 
-	
-	
+	  
 	  proc new_floor
 	pusha            
 	xor bh, bh  ; bh = 0
 	mov cx, [first_floor]
-	mov dx, floor_size
-	
+	mov dx, [floor_size]
 	mov ax, [color] 
 	mov ah, 0ch
 	int 10h  
 	dec first_floor
 	cmp first_floor, 100
 	ja new_Floor
+	je math
 	popa
 	 ret
 	  endp new_Floor
-	 
 	  
 	  
 
@@ -382,7 +382,7 @@ start:
    sub al, '0' ; convert ASCII to integer 
    cmp al, 9
   ja read_floor
-   mov floor_num, al
+   mov floor_num, ax
    
   read_size:
    lea dx, msg2
@@ -421,22 +421,36 @@ mov floor_size, ax
 
 
  
- mov ax,13h
- int 10h 
+mov ah, 0
+mov al, 13h
+int 10h
+ 
+ 
 
    
    call draw_LeftLine
+   
+   
+  
     
     math:
     
    mov ax, floor_size 
 	   
 	 sub ax, remember
+	 
+	 
 
 mov floor_size, ax  
- call new_floor
+mov [first_floor], 199  
+ inc mone
   
-	
+mov ax, mone
+mov bx,floor_num
+xor bh, bh
+cmp al,bl
+jb new_floor
+ret	
 	
 	
 	circle_proc:
