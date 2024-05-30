@@ -286,7 +286,7 @@ call rect
 
 next_line:
  mov y_first, 199
- inc mid_rect 
+ inc x_rect 
 	
 	inc count
 	mov ax, count
