@@ -33,233 +33,16 @@ color_o db 0fh
 y_stickman dw 150
 x_stickman dw 30
 h dw 30                
-                
-                
-
+y_coordinate dw 25 
+y_temp dw 25                
+x_rect dw 150
+y_first dw 199
+max_rect dw 174
+count dw 0                
+mid_rect dw 157
+end_rect dw 164
+count_2 dw 7 
 .CODE 
-proc circle
-
- 
-
-
-
-     mov bx, x_value
-     mov ax,2
-     mul bx
-     mov bx,3
-     sub bx,ax 
-     mov decision,bx
-     mov al,color_o
-     mov ah,0ch
-     drawcircle:
-     mov al,color_o
-     mov ah,0ch 
-     mov cx, x_value
-     add cx, x_center 
-     mov dx, y_value
-     add dx, y_center
-     int 10h
-     mov cx, x_value 
-     neg cx
-     add cx, x_center 
-     int 10h
-     mov cx, y_value     
-     add cx, x_center 
-     mov dx, x_value
-     add dx, y_center
-     int 10h 
-     mov cx, y_value 
-     neg cx
-     add cx, x_center 
-     int 10h
-     mov cx, x_value 
-     add cx, x_center
-     mov dx, y_value
-     neg dx
-     add dx, y_center
-     int 10h
-
-; 
-
- mov cx, x_value 
- neg cx
-
- add cx, x_center 
-
- int 10h
-
-
-
- mov cx, y_value 
-
- add cx, x_center 
-
- mov dx, x_value
-
- neg dx
-
- add dx, y_center
-
- int 10h
-
-; 
-
- mov cx, y_value 
-
- neg cx
-
- add cx, x_center 
-
- int 10h
-
- 
-
-condition1:
-
- cmp decision,0
-
- jg condition2      
-
- mov cx, y_value
-
- mov ax, 2
-
- imul cx 
-
- add ax, 3 
-
- mov bx, 2
-
- mul bx  
-
- add decision, ax
-
- mov bx, y_value
-
- mov dx, x_value
-
- 
-
-  
-
- inc y_value
-
- jmp drawcircle
-
-
-
-condition2:
-
- mov cx, y_value 
-
- mov ax,2
-
- mul cx 
-
- mov bx,ax
-
- mov cx, x_value
-
- mov ax, -2
-
- imul cx 
-
- add bx,ax
-
- add bx,5
-
- mov ax,2
-
- imul bx        
-
- add decision,ax
-
- mov bx, y_value
-
- mov dx, x_value
-
- cmp bx, dx
-
- ja donedrawing
-
- dec x_value    
-
- inc y_value
-
- jmp drawcircle
- 
-donedrawing:
-mov cx,x_stickman
-mov dx,y_stickman
-add dx,h
-mov al,0fh
-mov ah,0ch
-next3:
-int 10h
-dec dx
-cmp dx,y_stickman
-jne next3
-;lf hand
-mov bx,10
-mov cx,30
-mov dx,155
-mov ah,0ch
-mov al,0fh
-lfhand:
-int 10h
- inc cx  
- inc dx 
- dec bx 
- cmp bx,0
- jne lfhand 
- ;r_hand
-    mov bx,10
-    mov cx,30
-    mov dx,155
-    mov ah,0ch
-    mov al,0fh
-rhandloop:
-int 10h
-dec cx ; increase x values 
- inc dx ; decrease y values
- dec bx ; decrease length
- cmp bx,0
- jne rhandloop
- 
- ;lf lag
-mov bx,10
-mov cx,30
-mov dx,180
-mov ah,0ch
-mov al,0fh
-lfleg:
-int 10h
- inc cx  
- inc dx 
- dec bx 
- cmp bx,0
- jne lfleg 
- ;r lag
-    mov bx,10
-    mov cx,30
-    mov dx,180
-    mov ah,0ch
-    mov al,0fh
-rlegloop:
-int 10h
-dec cx ; increase x values 
- inc dx ; decrease y values
- dec bx ; decrease length
- cmp bx,0
- jne rlegloop
- 
- 
- 
- 
-  
-
-ret
-endp circle  
 
  proc draw_LeftLine
 	pusha
@@ -361,6 +144,47 @@ endp circle
 	 ret
 	  endp new_Floor
 	  
+	    proc rect
+	     
+	    pusha
+	    xor bh, bh  ; bh = 0 
+	   
+	    mov cx, [x_rect]
+	    mov dx, [y_first]
+	    mov ax, [color]
+	    mov ah, 0ch
+	    int 10h
+	    dec y_first
+	    mov bx, y_first
+	    cmp bx, max_rect
+	    ja rect
+        je next_line
+	   
+	    popa
+
+	        endp rect
+	        
+	    proc paint_rect
+	     
+	    pusha
+	    xor bh, bh  ; bh = 0 
+	   
+	    mov cx, [mid_rect]
+	    mov dx, [y_first]
+	    mov ax, [color]
+	    mov ah, 0ch
+	    int 10h
+	    dec y_first
+	    mov bx, y_first
+	    cmp bx, 174
+	    ja paint_rect
+	    je next_line
+	   
+	    popa
+
+	    endp print_rect	   
+	    
+	  
 	  
 
 
@@ -413,7 +237,12 @@ jbe read_size
 mov remember, ax
 mov ax, max 
 sub ax, remember
-mov floor_size, ax 
+mov floor_size, ax
+
+
+ 
+
+
 
 
  
@@ -428,7 +257,8 @@ int 10h
  
 
    
-   call draw_LeftLine
+   call draw_LeftLine 
+   
    
    
   
@@ -450,17 +280,42 @@ mov bx,floor_num
 xor bh, bh
 cmp al,bl
 jb new_floor
-ret	
-	
-	
-	circle_proc:
-	int 10h 
 
- mov x_center,10
- mov y_center,120
- mov y_value,0
- mov x_value,20
- call circle
+
+call rect
+
+next_line:
+ mov y_first, 199
+ inc mid_rect 
+	
+	inc count
+	mov ax, count
+	xor bh, bh
+	cmp ax, 21
+	jbe rect
+	ja color_rect 
+	
+	next_color_line:
+ mov y_first, 199
+ inc x_rect 
+	
+	inc count
+	mov ax, count_2
+	xor bh, bh
+	cmp ax, 14
+	jbe  color_rect 
+	
+	
+	color_rect:
+	mov color, 0h
+	call paint_rect
+	
+	 
+	    
+
+
+	
+
     
 	
 	
