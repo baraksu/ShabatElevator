@@ -36,7 +36,7 @@ h dw 30
 y_coordinate dw 25 
 y_temp dw 25                
 x_rect dw 150
-y_first dw 199
+y_first dw 198
 max_rect dw 174
 count dw 0                
 mid_rect dw 157
@@ -178,11 +178,14 @@ count_2 dw 7
 	    mov bx, y_first
 	    cmp bx, 174
 	    ja paint_rect
-	    je next_line
+	    je next_color_line
 	   
 	    popa
 
-	    endp print_rect	   
+	    endp print_rect
+	    
+	    
+	        
 	    
 	  
 	  
@@ -285,7 +288,7 @@ jb new_floor
 call rect
 
 next_line:
- mov y_first, 199
+ mov y_first, 198
  inc x_rect 
 	
 	inc count
@@ -296,15 +299,15 @@ next_line:
 	ja color_rect 
 	
 	next_color_line:
- mov y_first, 199
- inc x_rect 
+ mov y_first, 198
+ inc mid_rect 
 	
-	inc count
+	inc count_2
 	mov ax, count_2
 	xor bh, bh
 	cmp ax, 14
 	jbe  color_rect 
-	
+	ja exit
 	
 	color_rect:
 	mov color, 0h
@@ -356,4 +359,3 @@ END start
  
    
    
-
