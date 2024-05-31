@@ -39,12 +39,15 @@ h dw 30
 y_coordinate dw 25 
 y_temp dw 25                
 x_rect dw 150
+y_base dw 198
 y_first dw 198
-max_rect dw 199
+max_rect dw 199 
+y_second dw 198
 count dw 0                
 mid_rect dw 157
 end_rect dw 164
 count_2 dw 7 
+
 .CODE 
 
  proc draw_LeftLine
@@ -173,13 +176,13 @@ count_2 dw 7
 	    xor bh, bh  ; bh = 0 
 	   
 	    mov cx, [mid_rect]
-	    mov dx, [y_first]
+	    mov dx, [y_second]
 	    mov ax, [color]
 	    mov ah, 0ch
 	    int 10h
-	    dec y_first
-	    mov bx, y_first
-	    cmp bx, 174
+	    dec y_second
+	    mov bx, y_second
+	    cmp bx, max_rect
 	    ja paint_rect
 	    je next_color_line
 	   
@@ -202,7 +205,26 @@ count_2 dw 7
 	    ja delete_rect
 	    je next_delete_line
 	    popa    
-	    endp delete_rect    
+	endp delete_rect
+	
+	 proc base_rect
+	pusha
+	    xor bh, bh  ; bh = 0 
+	    mov color, 15
+	    mov cx, [x_rect]
+	    mov dx, [y_base]
+	    mov ax, [color]
+	    mov ah, 0ch
+	    int 10h
+	    dec y_base
+	    mov bx, y_base
+	    cmp bx, 174
+	    ja base_rect
+        je base_next_line
+	   
+	    popa
+
+	        endp rect
 	    
 	  
 	  
@@ -277,7 +299,7 @@ int 10h
  
 
    
-  ; call draw_LeftLine 
+   call draw_LeftLine 
    
    
    
@@ -310,9 +332,12 @@ mov color, 15
 call rect
 
 next_line:
+mov y_base, 198
  mov y_first, 198
+ mov y_second, 198
  mov ax, new_y
- sub y_first, ax 
+ sub y_first, ax
+ sub y_second, ax 
  inc x_rect 
 	
 	inc count
@@ -324,8 +349,10 @@ next_line:
 	
 	next_color_line:
  mov y_first, 198
+ mov y_second, 198
  mov ax, new_y
- sub y_first, ax 
+ sub y_first, ax
+ sub y_second, ax 
  inc mid_rect 
 	
 	inc count_2
@@ -355,23 +382,52 @@ next_line:
 	xor bh, bh
 	cmp ax, 28
 	jbe delete_rect
+	
  
 	 
 	 
-	next_rect_floor:
+	next_rect_floor: 
+	mov max_black, 7
+	mov mid_rect, 150
+	mov mid_rect, 157
 	mov count, 0
+	mov count_2, 7
 	mov y_first, 198
-	mov x_rect, 150 
-	add new_y, 25
+	mov x_rect, 150
+	 mov ax, remember 
+	add new_y, ax
 	mov ax, new_y
-	sub y_first, ax
+	sub y_first, ax 
+	sub y_second, ax
+	 
 	inc rect_floor
 	mov ax, rect_floor
-	cmp ax, floor_num
+	xor ah, ah
+	mov bx, floor_num
+	xor bh, bh
+	cmp ax, bx
 	jb rect_math
-	je exit
+	je base_rect 
+	
+	base_next_line:
+	mov y_base, 198
+	inc x_rect
+	inc count
+mov ax, count
+xor bh, bh
+cmp ax, 21
+jbe base_rect
+
+	 
 	
 	
+	
+	
+	
+	
+	mov ah, 0h
+int 16h
+
 	 
 	 
 	 
@@ -394,8 +450,7 @@ next_line:
 exit:
 			
 
-  mov AH,4CH
-  int 21h
+ 
 
 END start    
 	
