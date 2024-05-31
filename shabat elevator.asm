@@ -1,4 +1,4 @@
-; 101
+; 102
 .MODEL small
 .STACK 100h
 
@@ -359,6 +359,7 @@ next_line:
 	 
 	 
 	next_rect_floor:
+	mov count, 0
 	mov y_first, 198
 	mov x_rect, 150 
 	add new_y, 25
