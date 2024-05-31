@@ -41,14 +41,23 @@ y_temp dw 25
 x_rect dw 150
 y_base dw 198
 y_first dw 198
-max_rect dw 199 
-y_second dw 198
+max_rect dw 198 
+y_second dw 199
 count dw 0                
 mid_rect dw 157
 end_rect dw 164
 count_2 dw 7 
 
 .CODE 
+proc delay
+	pusha
+	mov cx, 03h   ;High Word
+	mov dx, 4240h ;Low Word
+	mov ah, 86h   ;Wait
+	int 15h
+	popa
+	ret
+endp delay
 
  proc draw_LeftLine
 	pusha
@@ -259,6 +268,8 @@ start:
    sub al, '0' ; convert ASCII to integer 
    cmp bl, 9
   ja read_size
+  cmp bl, 0
+  jb read_size
    mov bl, al ; save first digit in BL 
 
 
@@ -267,6 +278,8 @@ int 21h   ; read second digit
 sub al, '0' ; convert ASCII to integer 
 cmp al, 9
 ja read_size
+ cmp bl, 0
+  jb read_size
 mov bh, al ; save second digit in BH
 
 mov al, 10 ; multiply first digit by 10
@@ -306,6 +319,7 @@ int 10h
  
     
     math:
+    
   
     
    mov ax, floor_size 
@@ -322,6 +336,7 @@ mov ax, mone
 mov bx,floor_num
 xor bh, bh
 cmp al,bl
+
 jb new_floor
 
 rect_math:
@@ -329,9 +344,11 @@ mov color, 15
   mov ax, max_rect
     sub ax, 25
     mov max_rect, ax
+   
 call rect
 
 next_line:
+ 
 mov y_base, 198
  mov y_first, 198
  mov y_second, 198
@@ -348,6 +365,7 @@ mov y_base, 198
 	ja color_rect 
 	
 	next_color_line:
+	 call delay
  mov y_first, 198
  mov y_second, 198
  mov ax, new_y
@@ -363,15 +381,18 @@ mov y_base, 198
 	ja delete
 	
 	color_rect:
+	 call delay
 	mov color, 0h
 	call paint_rect
 	  
 	  delete:
+	 
 	  mov x_rect, 150
 	 mov color, 0
 	call delete_rect
 	
 	next_delete_line:
+	
 	mov y_first, 198
  mov ax, new_y
  sub y_first, ax 
@@ -386,7 +407,8 @@ mov y_base, 198
  
 	 
 	 
-	next_rect_floor: 
+	next_rect_floor:
+	
 	mov max_black, 7
 	mov mid_rect, 150
 	mov mid_rect, 157
@@ -409,7 +431,8 @@ mov y_base, 198
 	jb rect_math
 	je base_rect 
 	
-	base_next_line:
+	base_next_line: 
+	 call delay
 	mov y_base, 198
 	inc x_rect
 	inc count
