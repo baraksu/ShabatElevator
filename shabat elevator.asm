@@ -1,3 +1,4 @@
+; 101
 .MODEL small
 .STACK 100h
 
@@ -22,8 +23,10 @@ x_2 dw 100
 y_2 dw 20
 first_floor dw 100
 next_floor dw ? 
-mone dw 0                
-                
+mone dw 0
+max_black dw 7
+rect_floor dw 0               
+new_y dw 0                
 x_center dw 30
 y_center dw 130
 y_value dw 0
@@ -37,7 +40,7 @@ y_coordinate dw 25
 y_temp dw 25                
 x_rect dw 150
 y_first dw 198
-max_rect dw 174
+max_rect dw 199
 count dw 0                
 mid_rect dw 157
 end_rect dw 164
@@ -184,8 +187,22 @@ count_2 dw 7
 
 	    endp print_rect
 	    
-	    
-	        
+	proc delete_rect
+	    pusha
+	    xor bh, bh  ; bh = 0 
+	   
+	    mov cx, [x_rect]
+	    mov dx, [y_first]
+	    mov ax, [color]
+	    mov ah, 0ch
+	    int 10h
+	    dec y_first
+	    mov bx, y_first
+	    cmp bx, max_rect
+	    ja delete_rect
+	    je next_delete_line
+	    popa    
+	    endp delete_rect    
 	    
 	  
 	  
@@ -260,13 +277,14 @@ int 10h
  
 
    
-   call draw_LeftLine 
+  ; call draw_LeftLine 
    
    
    
-  
+ 
     
     math:
+  
     
    mov ax, floor_size 
 	   
@@ -284,11 +302,17 @@ xor bh, bh
 cmp al,bl
 jb new_floor
 
-
+rect_math:
+mov color, 15
+  mov ax, max_rect
+    sub ax, 25
+    mov max_rect, ax
 call rect
 
 next_line:
  mov y_first, 198
+ mov ax, new_y
+ sub y_first, ax 
  inc x_rect 
 	
 	inc count
@@ -300,6 +324,8 @@ next_line:
 	
 	next_color_line:
  mov y_first, 198
+ mov ax, new_y
+ sub y_first, ax 
  inc mid_rect 
 	
 	inc count_2
@@ -307,12 +333,46 @@ next_line:
 	xor bh, bh
 	cmp ax, 14
 	jbe  color_rect 
-	ja exit
+	ja delete
 	
 	color_rect:
 	mov color, 0h
 	call paint_rect
+	  
+	  delete:
+	  mov x_rect, 150
+	 mov color, 0
+	call delete_rect
 	
+	next_delete_line:
+	mov y_first, 198
+ mov ax, new_y
+ sub y_first, ax 
+ inc x_rect 
+	
+	inc max_black
+	mov ax, max_black
+	xor bh, bh
+	cmp ax, 28
+	jbe delete_rect
+ 
+	 
+	 
+	next_rect_floor:
+	mov y_first, 198
+	mov x_rect, 150 
+	add new_y, 25
+	mov ax, new_y
+	sub y_first, ax
+	inc rect_floor
+	mov ax, rect_floor
+	cmp ax, floor_num
+	jb rect_math
+	je exit
+	
+	
+	 
+	 
 	 
 	    
 
