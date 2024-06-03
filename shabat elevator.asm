@@ -156,7 +156,7 @@ endp delay
 	ja new_Floor
 	je math
 	popa
-	 ret
+	 ret 30 
 	  endp new_Floor
 	  
 	    proc rect
@@ -194,6 +194,7 @@ endp delay
 	    cmp bx, max_rect
 	    ja paint_rect
 	    je next_color_line
+	    
 	   
 	    popa
 
@@ -230,6 +231,7 @@ endp delay
 	    cmp bx, 174
 	    ja base_rect
         je base_next_line
+        ret 18
 	   
 	    popa
 
