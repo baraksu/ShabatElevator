@@ -46,7 +46,9 @@ y_second dw 199
 count dw 0                
 mid_rect dw 157
 end_rect dw 164
-count_2 dw 7 
+count_2 dw 7
+count_3 dw 1 
+count_y dw 198
 
 .CODE 
 proc delay
@@ -171,13 +173,35 @@ endp delay
 	    int 10h
 	    dec y_first
 	    mov bx, y_first
-	    cmp bx, max_rect
+	    cmp bx, max_rect 
+	   
 	    ja rect
+	  
+        je next_line
+	   
+	    popa 
+	    
+	    proc next_rect
+	     
+	    pusha
+	    xor bh, bh  ; bh = 0 
+	   
+	    mov cx, [x_rect]
+	    mov dx, [y_first]
+	    mov ax, [color]
+	    mov ah, 0ch
+	    int 10h
+	    dec y_first
+	    mov bx, y_first
+	    cmp bx, max_rect 
+	   
+	    ja rect
+	  
         je next_line
 	   
 	    popa
 
-	        endp rect
+	        endp next_rect
 	        
 	    proc paint_rect
 	     
@@ -213,7 +237,9 @@ endp delay
 	    mov bx, y_first
 	    cmp bx, max_rect
 	    ja delete_rect
-	    je next_delete_line
+	    
+	    je next_delete_line 
+	    inc rect_floor
 	    popa    
 	endp delete_rect
 	
@@ -231,11 +257,12 @@ endp delay
 	    cmp bx, 174
 	    ja base_rect
         je base_next_line
-        ret 18
+       
 	   
 	    popa
-
-	        endp rect
+        ret 18
+	 endp rect
+	 
 	    
 	  
 	  
@@ -324,7 +351,8 @@ int 10h
     
   
     
-   mov ax, floor_size 
+   mov ax, floor_size
+    
 	   
 	 sub ax, remember
 	 
@@ -346,11 +374,25 @@ mov color, 15
   mov ax, max_rect
     sub ax, 25
     mov max_rect, ax
+    call rect
+    
+    rect_mat:
+    mov color, 15
+  mov ax, count_3
+  mov bx, remember
+  
+ 
+    
+    
+    sub max_rect, bx
+    inc count_3
+    
    
-call rect
+
 
 next_line:
- 
+
+  
 mov y_base, 198
  mov y_first, 198
  mov y_second, 198
@@ -409,7 +451,8 @@ mov y_base, 198
  
 	 
 	 
-	next_rect_floor:
+	next_rect_floor: 
+	mov sp, 50000
 	
 	mov max_black, 7
 	mov mid_rect, 150
@@ -423,18 +466,21 @@ mov y_base, 198
 	mov ax, new_y
 	sub y_first, ax 
 	sub y_second, ax
+	
 	 
-	inc rect_floor
+	
 	mov ax, rect_floor
 	xor ah, ah
+	inc rect_floor
 	mov bx, floor_num
 	xor bh, bh
 	cmp ax, bx
-	jb rect_math
+	jb rect_mat
 	je base_rect 
 	
-	base_next_line: 
-	 call delay
+	base_next_line:
+	add sp, 10000 
+	
 	mov y_base, 198
 	inc x_rect
 	inc count
